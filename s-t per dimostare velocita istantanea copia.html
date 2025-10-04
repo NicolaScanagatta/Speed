@@ -595,24 +595,12 @@
         
         // --- Strategia di Caricamento (Il punto chiave) ---
         
-        // MathJax (per le formule) è caricato asincronamente.
-        // Dobbiamo assicurarci che sia pronto PRIMA di disegnare il grafico,
-        // altrimenti il layout potrebbe spostarsi (Cumulative Layout Shift) o 
-        // le dimensioni del Canvas non essere corrette.
-        if (window.MathJax) {
-            // Se MathJax è già definito, attendi il suo completamento.
-            MathJax.startup.promise.then(initApp);
-        } else {
-            // Se MathJax non c'è, attendi l'evento di caricamento completo del DOM.
-            // Questo gestisce anche la casistica in cui MathJax fallisce o non viene usato.
-            window.onload = initApp;
-        }
-
-        // Se la pagina è già completamente caricata (caso tipico nell'ambiente Canvas), esegui subito.
-        if (document.readyState === 'complete' && !window.MathJax) {
-            initApp();
-        }
+        // La funzione initApp() deve essere eseguita solo quando l'intera pagina,
+        // inclusi gli stili e lo script MathJax, è stata completamente caricata.
+        // L'evento 'onload' garantisce che tutto sia pronto.
+        window.onload = initApp;
         
     </script>
 </body>
 </html>
+
