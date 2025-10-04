@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velocità nel Moto Vario</title>
+    <style>
+        /* Tipografia e Layout Generale */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #eef2f5; /* Sfondo più chiaro */
+            color: #2c3e50; /* Testo scuro */
+            min-height: 100vh;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column; /* Cambiato in colonna per LIM */
+            gap: 25px;
+            width: 100%;
+            max-width: 1300px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        h1, .subtitle {
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #007bff; /* Blu acceso */
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        /* Contenitore Grafico e Controlli Affiancati (Nuovo per Layout Rettangolare) */
+        .top-section {
+            display: flex;
+            flex-wrap: nowrap; /* Non wrap per mantenere rettangolare su LIM */
+            gap: 25px;
+        }
+
+        /* Contenitore Canvas */
+        .canvas-container {
+            flex: 2;
+            min-width: 50%;
+        }
+        /* Contenitore Sidebar per Controlli */
+        .sidebar-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 400px; /* Limita larghezza sidebar */
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Box Formula Principale */
+        .equation-box {
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #cceeff;
+            font-size: 1.1em;
+        }
+        .equation-content {
+            font-family: "Courier New", Courier, monospace;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* Grafico */
+        canvas {
+            display: block;
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Controlli (Pannello laterale) */
+        .controls {
+            padding: 20px;
+            background-color: #fefefe;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Formule (Spostato sotto il grafico e largo quanto il grafico) */
+        .formulas {
+            padding: 20px;
+            background-color: #fefefe;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .bottom-section {
+            width: 100%; /* Occupa tutta la larghezza per sfruttare lo spazio sotto */
+            display: flex;
+            justify-content: center;
+        }
+        .formulas-container {
+            flex: 2; /* Occupa lo stesso spazio del canvas */
+            min-width: 50%;
+        }
+
+        /* Slider e Etichette */
+        .slider-group {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .slider-label {
+            font-weight: 700;
+            color: #34495e;
+            font-size: 1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            height: 10px;
+            accent-color: #007bff;
+        }
+
+        /* Display Valori */
+        .info-display {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 14px;
+        }
+        .info-box {
+            padding: 12px 8px; /* Ridotto padding per compattezza */
+            border-radius: 10px;
+            background-color: #ecf0f1;
+            text-align: center;
+            border: 1px solid #dcdde1;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #34495e;
+            font-size: 0.9em;
+        }
+        .info-value {
+            font-weight: 800;
+            display: block;
+            font-family: 'Consolas', monospace;
+            font-size: 1.2em; /* Leggermente ridotto */
+            margin-top: 5px;
+        }
+
+        /* Colori per i display */
+        #v_media_val { color: #28a745; } /* Velocità media: Verde */
+        #v_istantanea_val { color: #dc3545; } /* Velocità istantanea: Rosso */
+
+        /* Pulsante Toggle (Ghost Button e colore dinamico) */
+        .control-button {
+            width: 100%;
+            padding: 8px 10px;
+            margin-top: 15px;
+            background-color: transparent; /* Sfondo Trasparente */
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            box-shadow: none;
+        }
+
+        /* Stati iniziali (Nascondi Tangente - Linea Tangente è Rossa) */
+        .control-button-show {
+            color: #dc3545; /* Testo rosso */
+            border: 2px solid #dc3545; /* Bordo rosso */
+        }
+        .control-button-show:hover {
+            background-color: rgba(220, 53, 69, 0.1); /* Sfondo rosso molto leggero al hover */
+        }
+
+        /* Stati alternativi (Mostra Tangente - Prossima azione Mostra, il colore è Blu) */
+        .control-button-hide {
+            color: #007bff; /* Testo blu */
+            border: 2px solid #007bff; /* Bordo blu */
+        }
+        .control-button-hide:hover {
+            background-color: rgba(0, 123, 255, 0.1); /* Sfondo blu molto leggero al hover */
+        }
+
+        /* Formule */
+        .formula-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #007bff;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .formula-content {
+            font-size: 1.1em;
+            /* Modifica CRUCIALE: allineamento orizzontale */
+            display: flex;
+            justify-content: space-around; /* Spazio tra le due formule */
+            align-items: center;
+        }
+        /* Ogni singola formula e la sua etichetta */
+        .formula-line {
+            display: flex;
+            align-items: center;
+            text-align: left;
+            /* Non serve più padding-left perché usiamo space-around */
+        }
+        .formula-line span {
+            margin-right: 10px;
+            font-weight: 500;
+        }
+
+        /* Nuova classe per nascondere la formula istantanea */
+        .hidden-formula {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none; /* Impedisce interazioni anche se trasparente */
+        }
+
+        /* Stile specifico per il testo MathJax per uniformità */
+        .formula-content mjx-container {
+            display: inline-block !important;
+            margin: 0 !important;
+        }
+
+        /* Media Query per layout responsivo (mobile) */
+        @media (max-width: 900px) {
+            .top-section {
+                flex-direction: column;
+            }
+            .sidebar-container {
+                max-width: 100%;
+            }
+            .formulas-container {
+                flex: 1;
+                min-width: 100%;
+            }
+            /* Su schermi piccoli le formule tornano in colonna */
+            .formula-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .formula-line {
+                padding-left: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1>Velocità nel Moto Vario (Grafico Spazio-Tempo)</h1>
+        <p class="subtitle">Analisi della velocità media e istantanea: la secante tende alla tangente.</p>
+
+        <div class="top-section">
+            <div class="canvas-container">
+                <canvas id="graphCanvas" width="800" height="500"></canvas>
+            </div>
+
+            <div class="sidebar-container">
+                <div class="equation-box">
+                    <!-- Formula esplicita -->
+                    Funzione Spazio-Tempo: <span class="equation-content">$$s(t) = 1.6t^{3} - 0.24t^{4}$$</span>
+                </div>
+
+                <div class="controls">
+
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            Istante $$t_{c}$$
+                            <span id="tc_val_compact" style="font-weight: bold; color: #007bff;"></span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="tcSlider" min="0.5" max="6.0" step="0.1" value="4.5">
+                        </div>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            Intervallo $$\Delta t$$
+                            <span id="dt_val_compact" style="font-weight: bold; color: #007bff;"></span>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="dtSlider" min="0.05" max="2.0" step="0.01" value="2.0">
+                        </div>
+                    </div>
+
+                    <!-- Pulsante per il toggle: Classi dinamiche gestite dal JS -->
+                    <button id="toggleTangent" class="control-button control-button-show">Nascondi Velocità Istantanea</button>
+
+                    <!-- Display dei risultati chiari -->
+                    <div class="info-display">
+                        <div class="info-box">
+                            <div class="info-label">Velocità Media (Secante)</div>
+                            <span id="v_media_val" class="info-value"></span>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Velocità Istantanea (Tangente)</div>
+                            <span id="v_istantanea_val" class="info-value"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Formule spostata in basso -->
+        <div class="bottom-section">
+            <div class="formulas-container formulas">
+                <div class="formula-title">Formule Concettuali</div>
+                <div class="formula-content">
+                    <div class="formula-line">
+                        <span>Velocità Media:</span> $$v_{media} = \frac{\Delta s}{\Delta t}$$
+                    </div>
+                    <!-- Aggiunto ID per controllo JS e classe iniziale di nascondimento -->
+                    <div class="formula-line hidden-formula" id="instantaneousFormula">
+                        <span>Velocità Istantanea:</span> $$v_{ist} = \lim_{\Delta t \to 0} \frac{\Delta s}{\Delta t}$$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script di caricamento di MathJax per il LaTeX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+
+    <script>
+        // --- Setup Iniziale ---
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const tcSlider = document.getElementById('tcSlider');
+        const dtSlider = document.getElementById('dtSlider');
+        const toggleButton = document.getElementById('toggleTangent');
+        const instantaneousFormula = document.getElementById('instantaneousFormula');
+
+        // Display dei valori (aggiornati per il nuovo layout)
+        const tcCompactDisplay = document.getElementById('tc_val_compact');
+        const dtCompactDisplay = document.getElementById('dt_val_compact');
+        const vMediaDisplay = document.getElementById('v_media_val');
+        const vIstantaneaDisplay = document.getElementById('v_istantanea_val');
+
+        // Stato per la linea tangente
+        let showTangent = true;
+
+        // --- Parametri del Grafico e della Fisica ---
+        const padding = 60;
+        const maxX = 8; // Tempo massimo sull'asse t
+        const maxY = 60; // Spazio massimo sull'asse s
+
+        // Funzione del moto: s(t) = 1.6*t^3 - 0.24*t^4
+        const position = (t) => 1.6 * Math.pow(t, 3) - 0.24 * Math.pow(t, 4);
+
+        // Funzione derivata (Velocità Istantanea): v(t) = 4.8*t^2 - 0.96*t^3
+        const velocity = (t) => 4.8 * Math.pow(t, 2) - 0.96 * Math.pow(t, 3);
+
+        // Istante di tempo centrale, controllato dallo slider
+        let t_center = parseFloat(tcSlider.value);
+
+        // Funzione per mappare le coordinate fisiche a quelle del canvas
+        const toCanvasX = (t) => padding + (t / maxX) * (canvas.width - 2 * padding);
+        const toCanvasY = (s) => canvas.height - padding - (s / maxY) * (canvas.height - 2 * padding);
+
+        // --- Funzioni di Disegno ---
+
+        function drawAxesAndGrid() {
+            ctx.beginPath();
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.font = '12px Inter, Arial';
+            ctx.fillStyle = '#2c3e50';
+            ctx.textAlign = 'center';
+
+            // Griglia e Etichette Asse X (Tempo)
+            for (let t = 1; t <= maxX; t++) {
+                const x = toCanvasX(t);
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, canvas.height - padding);
+                ctx.fillText(t, x, canvas.height - padding + 20);
+            }
+            // Griglia e Etichette Asse Y (Spazio)
+            ctx.textAlign = 'right';
+            for (let s = 10; s <= maxY; s += 10) {
+                const y = toCanvasY(s);
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.fillText(s, padding - 10, y + 4);
+            }
+            ctx.stroke();
+
+            // Assi Principali
+            ctx.beginPath();
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(canvas.width - padding + 10, canvas.height - padding);
+            ctx.moveTo(padding, canvas.height - padding);
+            ctx.lineTo(padding, padding - 10);
+            ctx.stroke();
+
+            // Etichette assi principali
+            ctx.font = '14px Inter, Arial';
+            ctx.fillStyle = '#2c3e50';
+            ctx.textAlign = 'center';
+            ctx.fillText('Tempo (s)', canvas.width / 2, canvas.height - 15);
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Spazio (m)', 0, 0);
+            ctx.restore();
+        }
+
+        function drawCurve() {
+            ctx.beginPath();
+            ctx.strokeStyle = '#3498db'; /* Curva in blu scuro */
+            ctx.lineWidth = 4;
+            const steps = 200;
+            for (let i = 0; i <= steps; i++) {
+                const t = (i / steps) * maxX;
+                const s = position(t);
+                const x = toCanvasX(t);
+                const y = toCanvasY(s);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+
+        function drawPoint(t, s, color, radius = 5) {
+            ctx.beginPath();
+            ctx.fillStyle = color;
+            ctx.arc(toCanvasX(t), toCanvasY(s), radius, 0, 2 * Math.PI);
+            ctx.fill();
+            // Aggiungi un piccolo contorno per visibilità
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+
+        function drawLine(slope, t0, s0, color, isDashed = false) {
+            // Calcola le coordinate y agli estremi del grafico (t=0 e t=maxX)
+            const s_start = s0 - slope * (t0 - 0);
+            const s_end = s0 + slope * (maxX - t0);
+
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            if (isDashed) {
+                ctx.setLineDash([8, 8]); /* Tratteggio più marcato per la secante */
+            } else {
+                ctx.setLineDash([]);
+            }
+
+            ctx.moveTo(toCanvasX(0), toCanvasY(s_start));
+            ctx.lineTo(toCanvasX(maxX), toCanvasY(s_end));
+            ctx.stroke();
+            ctx.setLineDash([]); // Ripristina la linea continua per gli altri disegni
+        }
+
+        // --- Funzione Principale di Aggiornamento ---
+
+        function update() {
+            t_center = parseFloat(tcSlider.value);
+            const dt = parseFloat(dtSlider.value);
+
+            // Calcoli per la Velocità Media
+            const t1 = t_center - dt;
+            const t2 = t_center + dt;
+            const s1 = position(t1);
+            const s2 = position(t2);
+
+            // Calcolo della Velocità Media
+            const v_media = (t2 - t1) === 0 ? 0 : (s2 - s1) / (t2 - t1);
+
+            // Calcolo della Velocità Istantanea (derivata)
+            const v_istantanea = velocity(t_center);
+            const s_center = position(t_center);
+
+            // 1. Pulizia e Base del Grafico
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawAxesAndGrid();
+            drawCurve();
+
+            // 2. Disegno della retta tangente (Velocità Istantanea) - Controllata dallo stato
+            if (showTangent) {
+                // Linea Tangente in rosso (#dc3545)
+                drawLine(v_istantanea, t_center, s_center, '#dc3545', false);
+            }
+
+            // 3. Disegno della retta secante (Velocità Media) e dei punti
+            if (dt > 0.05) {
+                // Linea Secante in verde (#28a745)
+                drawLine(v_media, t1, s1, '#28a745', true);
+                drawPoint(t1, s1, '#28a745', 6);
+                drawPoint(t2, s2, '#28a745', 6);
+            }
+
+            // 4. Disegno del punto centrale (Istante t_c)
+            drawPoint(t_center, s_center, '#dc3545', 8);
+
+            // 5. Aggiornamento dei Display
+            tcCompactDisplay.textContent = `${t_center.toFixed(2)} s`;
+            dtCompactDisplay.textContent = `± ${dt.toFixed(2)} s`;
+            vMediaDisplay.textContent = `${v_media.toFixed(2)} m/s`;
+            vIstantaneaDisplay.textContent = `${v_istantanea.toFixed(2)} m/s`;
+        }
+
+        // --- Funzioni di Controllo e Event Listener ---
+
+        function handleTcChange() {
+            t_center = parseFloat(tcSlider.value);
+            // Limita il delta t massimo per non uscire dal grafico
+            const maxDt = Math.min(t_center - 0.05, maxX - t_center - 0.05);
+
+            dtSlider.max = maxDt > 0.05 ? maxDt.toFixed(2) : 0.05;
+
+            if (parseFloat(dtSlider.value) > parseFloat(dtSlider.max)) {
+                dtSlider.value = dtSlider.max;
+            }
+            update();
+        }
+
+        function handleToggleTangent() {
+            showTangent = !showTangent;
+
+            // Aggiorna il testo e lo stile del pulsante (Ghost Button)
+            toggleButton.classList.remove('control-button-show', 'control-button-hide');
+
+            if (showTangent) {
+                toggleButton.textContent = 'Nascondi Velocità Istantanea';
+                toggleButton.classList.add('control-button-show');
+                // MOSTRA la formula istantanea
+                instantaneousFormula.classList.remove('hidden-formula');
+            } else {
+                toggleButton.textContent = 'Mostra Velocità Istantanea';
+                toggleButton.classList.add('control-button-hide');
+                // NASCONDI la formula istantanea
+                instantaneousFormula.classList.add('hidden-formula');
+            }
+            update();
+        }
+
+        // Inizializza il pulsante e lo stato
+        // Chiamata inversa per assicurare che il testo sia "Nascondi" e lo stato sia TRUE all'inizio
+        showTangent = false;
+        handleToggleTangent();
+
+        tcSlider.addEventListener('input', handleTcChange);
+        dtSlider.addEventListener('input', update);
+        toggleButton.addEventListener('click', handleToggleTangent);
+
+        function resizeAndDraw() {
+            const container = document.querySelector('.canvas-container');
+            // Mantieni un aspect ratio che bilanci bene lo spazio su una LIM
+            const aspectRatio = 5 / 8;
+            canvas.width = container.offsetWidth;
+            // Imposta l'altezza in base alla larghezza per mantenere l'aspect ratio
+            canvas.height = canvas.width * aspectRatio;
+            handleTcChange();
+        }
+
+        window.addEventListener('resize', resizeAndDraw);
+        setTimeout(() => {
+            resizeAndDraw();
+            update(); // Assicura che il grafico sia disegnato al primo load
+        }, 100);
+        
+    </script>
+</body>
+</html>
