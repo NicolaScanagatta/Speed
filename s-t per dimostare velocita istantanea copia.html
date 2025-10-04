@@ -69,7 +69,7 @@
         /* Box Formula Principale */
         .equation-box {
             padding: 15px;
-            background-color: #f0f8ff;
+            background-color: #f0f8ff; 
             border-radius: 12px;
             text-align: center;
             border: 1px solid #cceeff;
@@ -90,7 +90,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-
+        
         /* Controlli (Pannello laterale) */
         .controls {
             padding: 20px;
@@ -99,7 +99,7 @@
             border: 1px solid #eee;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-
+        
         /* Formule (Spostato sotto il grafico e largo quanto il grafico) */
         .formulas {
             padding: 20px;
@@ -177,11 +177,11 @@
         /* Colori per i display */
         #v_media_val { color: #28a745; } /* Velocità media: Verde */
         #v_istantanea_val { color: #dc3545; } /* Velocità istantanea: Rosso */
-
+        
         /* Pulsante Toggle (Ghost Button e colore dinamico) */
         .control-button {
             width: 100%;
-            padding: 8px 10px;
+            padding: 8px 10px; 
             margin-top: 15px;
             background-color: transparent; /* Sfondo Trasparente */
             font-weight: 600;
@@ -234,7 +234,7 @@
         }
         .formula-line span {
             margin-right: 10px;
-            font-weight: 500;
+            font-weight: 500; 
         }
 
         /* Nuova classe per nascondere la formula istantanea */
@@ -243,13 +243,13 @@
             transition: opacity 0.5s ease-in-out;
             pointer-events: none; /* Impedisce interazioni anche se trasparente */
         }
-
+        
         /* Stile specifico per il testo MathJax per uniformità */
         .formula-content mjx-container {
-            display: inline-block !important;
+            display: inline-block !important; 
             margin: 0 !important;
         }
-
+        
         /* Media Query per layout responsivo (mobile) */
         @media (max-width: 900px) {
             .top-section {
@@ -268,7 +268,7 @@
                 gap: 15px;
             }
             .formula-line {
-                padding-left: 5%;
+                padding-left: 5%; 
             }
         }
     </style>
@@ -289,9 +289,9 @@
                     <!-- Formula esplicita -->
                     Funzione Spazio-Tempo: <span class="equation-content">$$s(t) = 1.6t^{3} - 0.24t^{4}$$</span>
                 </div>
-
+                
                 <div class="controls">
-
+                    
                     <div class="slider-group">
                         <div class="slider-label">
                             Istante $$t_{c}$$
@@ -311,7 +311,7 @@
                             <input type="range" id="dtSlider" min="0.05" max="2.0" step="0.01" value="2.0">
                         </div>
                     </div>
-
+                    
                     <!-- Pulsante per il toggle: Classi dinamiche gestite dal JS -->
                     <button id="toggleTangent" class="control-button control-button-show">Nascondi Velocità Istantanea</button>
 
@@ -348,7 +348,7 @@
         </div>
 
     </div>
-
+    
     <!-- Script di caricamento di MathJax per il LaTeX -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
 
@@ -468,7 +468,7 @@
             // Calcola le coordinate y agli estremi del grafico (t=0 e t=maxX)
             const s_start = s0 - slope * (t0 - 0);
             const s_end = s0 + slope * (maxX - t0);
-
+            
             ctx.beginPath();
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
@@ -498,7 +498,7 @@
 
             // Calcolo della Velocità Media
             const v_media = (t2 - t1) === 0 ? 0 : (s2 - s1) / (t2 - t1);
-
+            
             // Calcolo della Velocità Istantanea (derivata)
             const v_istantanea = velocity(t_center);
             const s_center = position(t_center);
@@ -517,11 +517,11 @@
             // 3. Disegno della retta secante (Velocità Media) e dei punti
             if (dt > 0.05) {
                 // Linea Secante in verde (#28a745)
-                drawLine(v_media, t1, s1, '#28a745', true);
+                drawLine(v_media, t1, s1, '#28a745', true); 
                 drawPoint(t1, s1, '#28a745', 6);
                 drawPoint(t2, s2, '#28a745', 6);
             }
-
+            
             // 4. Disegno del punto centrale (Istante t_c)
             drawPoint(t_center, s_center, '#dc3545', 8);
 
@@ -537,8 +537,8 @@
         function handleTcChange() {
             t_center = parseFloat(tcSlider.value);
             // Limita il delta t massimo per non uscire dal grafico
-            const maxDt = Math.min(t_center - 0.05, maxX - t_center - 0.05);
-
+            const maxDt = Math.min(t_center - 0.05, maxX - t_center - 0.05); 
+            
             dtSlider.max = maxDt > 0.05 ? maxDt.toFixed(2) : 0.05;
 
             if (parseFloat(dtSlider.value) > parseFloat(dtSlider.max)) {
@@ -549,29 +549,29 @@
 
         function handleToggleTangent() {
             showTangent = !showTangent;
-
+            
             // Aggiorna il testo e lo stile del pulsante (Ghost Button)
             toggleButton.classList.remove('control-button-show', 'control-button-hide');
 
             if (showTangent) {
                 toggleButton.textContent = 'Nascondi Velocità Istantanea';
-                toggleButton.classList.add('control-button-show');
+                toggleButton.classList.add('control-button-show'); 
                 // MOSTRA la formula istantanea
-                instantaneousFormula.classList.remove('hidden-formula');
+                instantaneousFormula.classList.remove('hidden-formula'); 
             } else {
                 toggleButton.textContent = 'Mostra Velocità Istantanea';
-                toggleButton.classList.add('control-button-hide');
+                toggleButton.classList.add('control-button-hide'); 
                 // NASCONDI la formula istantanea
                 instantaneousFormula.classList.add('hidden-formula');
             }
             update();
         }
-
+        
         // Inizializza il pulsante e lo stato
         // Chiamata inversa per assicurare che il testo sia "Nascondi" e lo stato sia TRUE all'inizio
         showTangent = false;
-        handleToggleTangent();
-
+        handleToggleTangent(); 
+        
         tcSlider.addEventListener('input', handleTcChange);
         dtSlider.addEventListener('input', update);
         toggleButton.addEventListener('click', handleToggleTangent);
@@ -579,18 +579,30 @@
         function resizeAndDraw() {
             const container = document.querySelector('.canvas-container');
             // Mantieni un aspect ratio che bilanci bene lo spazio su una LIM
-            const aspectRatio = 5 / 8;
+            const aspectRatio = 5 / 8; 
             canvas.width = container.offsetWidth;
             // Imposta l'altezza in base alla larghezza per mantenere l'aspect ratio
-            canvas.height = canvas.width * aspectRatio;
+            canvas.height = canvas.width * aspectRatio; 
             handleTcChange();
         }
 
         window.addEventListener('resize', resizeAndDraw);
-        setTimeout(() => {
+        
+        // --- CORREZIONE: Funzione di inizializzazione robusta ---
+        function initApp() {
             resizeAndDraw();
-            update(); // Assicura che il grafico sia disegnato al primo load
-        }, 100);
+            update(); // Assicura che il grafico sia disegnato
+        }
+
+        // Il codice è alla fine del body, ma usiamo 'load' per massima sicurezza.
+        // Questo attende che TUTTI gli elementi, compresi i CSS che definiscono le dimensioni, siano pronti.
+        window.onload = initApp;
+
+        // Se l'utente apre la pagina da un ambiente locale o molto veloce, 
+        // a volte 'load' è già scattato. Eseguiamo la funzione se la pagina è già completa.
+        if (document.readyState === 'complete') {
+            initApp();
+        }
         
     </script>
 </body>
