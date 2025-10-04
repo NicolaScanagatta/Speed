@@ -567,14 +567,21 @@
             update();
         }
         
-        // Inizializza il pulsante e lo stato
-        // Chiamata inversa per assicurare che il testo sia "Nascondi" e lo stato sia TRUE all'inizio
-        showTangent = false;
-        handleToggleTangent(); 
-        
-        tcSlider.addEventListener('input', handleTcChange);
-        dtSlider.addEventListener('input', update);
-        toggleButton.addEventListener('click', handleToggleTangent);
+        // --- Funzione di Inizializzazione Completa ---
+        function initApp() {
+            // 1. Inizializza pulsante e stato (per testo/visibilità)
+            showTangent = false;
+            handleToggleTangent(); 
+            
+            // 2. Esegue il resize e il primo disegno del grafico
+            resizeAndDraw();
+            
+            // 3. Aggiunge i listener
+            tcSlider.addEventListener('input', handleTcChange);
+            dtSlider.addEventListener('input', update);
+            toggleButton.addEventListener('click', handleToggleTangent);
+            window.addEventListener('resize', resizeAndDraw);
+        }
 
         function resizeAndDraw() {
             const container = document.querySelector('.canvas-container');
@@ -585,22 +592,24 @@
             canvas.height = canvas.width * aspectRatio; 
             handleTcChange();
         }
-
-        window.addEventListener('resize', resizeAndDraw);
         
-        // --- CORREZIONE: Funzione di inizializzazione robusta ---
-        function initApp() {
-            resizeAndDraw();
-            update(); // Assicura che il grafico sia disegnato
+        // --- Strategia di Caricamento (Il punto chiave) ---
+        
+        // MathJax (per le formule) è caricato asincronamente.
+        // Dobbiamo assicurarci che sia pronto PRIMA di disegnare il grafico,
+        // altrimenti il layout potrebbe spostarsi (Cumulative Layout Shift) o 
+        // le dimensioni del Canvas non essere corrette.
+        if (window.MathJax) {
+            // Se MathJax è già definito, attendi il suo completamento.
+            MathJax.startup.promise.then(initApp);
+        } else {
+            // Se MathJax non c'è, attendi l'evento di caricamento completo del DOM.
+            // Questo gestisce anche la casistica in cui MathJax fallisce o non viene usato.
+            window.onload = initApp;
         }
 
-        // Il codice è alla fine del body, ma usiamo 'load' per massima sicurezza.
-        // Questo attende che TUTTI gli elementi, compresi i CSS che definiscono le dimensioni, siano pronti.
-        window.onload = initApp;
-
-        // Se l'utente apre la pagina da un ambiente locale o molto veloce, 
-        // a volte 'load' è già scattato. Eseguiamo la funzione se la pagina è già completa.
-        if (document.readyState === 'complete') {
+        // Se la pagina è già completamente caricata (caso tipico nell'ambiente Canvas), esegui subito.
+        if (document.readyState === 'complete' && !window.MathJax) {
             initApp();
         }
         
